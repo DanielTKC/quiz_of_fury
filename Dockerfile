@@ -4,3 +4,4 @@ WORKDIR /usr/src/app
 COPY poetry.lock pyproject.toml /usr/src/app/
 RUN pip3 install poetry
 RUN poetry install
+RUN poetry self add poetry-plugin-shell
