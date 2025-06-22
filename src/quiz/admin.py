@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import flashcard, Deck
+from .models import FlashCard, Deck
 
-admin.site.register(flashcard)
+admin.site.register(FlashCard)
 admin.site.register(Deck)
