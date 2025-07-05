@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Profile</title>
+</head>
+<body>
+    <h1>Welcome, {{ user.get_full_name|default:user.username }}!</h1>
+    <p>Email: {{ user.email }}</p>
+
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+    </form>
+</body>
+</html>
