@@ -8,3 +8,5 @@ class Deck(models.Model):
     tags = models.CharField(max_length=300, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    
