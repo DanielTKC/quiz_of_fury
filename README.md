@@ -23,4 +23,10 @@
    
 ![img.png](img.png)
 
-## The app does nothing as of now, but it's an easy way to get django installed and play around!
+## Generate some sample data
+From command line, run:
+```
+docker compose exec app bash
+cd src
+python manage.py create_sample_deck
+```

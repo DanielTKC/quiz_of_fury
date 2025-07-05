@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container px-4 px-lg-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="bi-plus-circle me-2"></i>Create New Deck
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="deck_name" class="form-label">Deck Name </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="deck_name"
+                                       name="deck_name"
+                                       placeholder="e.g., Spanish Vocabulary, Biology 101, etc."
+                                       required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">Tags (optional)</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="tags"
+                                       name="tags"
+                                       placeholder="e.g., Spanish">
+                                <div class="form-text">Separate tags with commas</div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'index' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi-check-circle me-1"></i>Create Deck
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
