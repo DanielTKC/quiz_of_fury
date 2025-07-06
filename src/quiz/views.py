@@ -79,6 +79,54 @@ def add_card(request, deck_id):
     }
     return render(request, 'quiz/add_card.html', context)
 
+
+def study_deck(request, deck_id):
+    """Start or continue studying a deck"""
+
+    deck = get_object_or_404(Deck, id=deck_id)
+    cards = deck.cards.all()
+
+    if not cards.exists():
+        messages.error(request, 'This deck has no fury to study!')
+        return redirect('deck_detail', deck_id=deck.id)
+
+    # Go to the next card
+    if request.method == 'POST' and 'next_card' in request.POST:
+    # Get the first card (for MVP, just go through cards in order)
+    # In session, track which card we're on
+        current_index = request.session.get(f'study_deck_{deck_id}_index', 0)
+        request.session[f'study_deck_{deck_id}_index'] = current_index + 1
+        return redirect('study_deck', deck_id=deck.id)
+
+    # If all cards are studied, reset to beginning
+    current_card_index = request.session.get(f'study_deck_{deck_id}_index', 0)
+
+    if current_card_index >= cards.count():
+        current_card_index = 0
+        request.session[f'study_deck_{deck_id}_index'] = current_card_index
+        messages.success(request, 'All cards complete, starting over.')
+    card = cards[current_card_index]
+    cards_studied = current_card_index
+    total_cards = cards.count()
+    cards_remaining = total_cards - current_card_index - 1
+
+    # VERY Simple session data for template
+    session_data = {
+        'cards_studied': cards_studied,
+        'total_due': total_cards,
+    }
+
+    context = {
+        'deck': deck,
+        'card': card,
+        'session_data': session_data,
+        'cards_remaining': cards_remaining,
+    }
+
+    return render(request, 'quiz/study_card.html', context)
+
+# TODO def rate_card(request, deck_id, card_id):
+
 @login_required
 def profile_view(request):
     return render(request, 'account/profile.html', {'user': request.user})
