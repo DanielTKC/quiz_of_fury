@@ -52,6 +52,7 @@ def deck_detail(request, deck_id):
 
 def add_card(request, deck_id):
     """Add a new card of furry to the deck"""
+
     deck = get_object_or_404(Deck, id=deck_id)
 
     if request.method == 'POST':
@@ -67,6 +68,7 @@ def add_card(request, deck_id):
                 tags=tags,
                 difficulty=3.0
             )
+
             messages.success(request, 'Card added!')
             return redirect('deck_detail', deck_id=deck.id)
         else:
