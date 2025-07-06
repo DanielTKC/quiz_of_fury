@@ -50,6 +50,33 @@ def deck_detail(request, deck_id):
     }
     return render(request, 'quiz/deck_detail.html', context)
 
+def add_card(request, deck_id):
+    """Add a new card of furry to the deck"""
+    deck = get_object_or_404(Deck, id=deck_id)
+
+    if request.method == 'POST':
+        question = request.POST.get('question', '').strip()
+        answer = request.POST.get('answer', '').strip()
+        tags = request.POST.get('tags', '').strip()
+
+        if question and answer:
+            FlashCard.objects.create(
+                deck=deck,
+                question=question,
+                answer=answer,
+                tags=tags,
+                difficulty=3.0
+            )
+            messages.success(request, 'Card added!')
+            return redirect('deck_detail', deck_id=deck.id)
+        else:
+            messages.error(request, 'You have to provide a question AND and answer.')
+
+    context = {
+        'deck': deck
+    }
+    return render(request, 'quiz/add_card.html', context)
+
 @login_required
 def profile_view(request):
     return render(request, 'account/profile.html', {'user': request.user})
