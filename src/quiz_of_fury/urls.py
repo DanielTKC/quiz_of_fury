@@ -9,7 +9,6 @@ from django.shortcuts import redirect
 
 urlpatterns = [
     path('', include('quiz.urls')),  # Redirect root URL to quiz app
-    path('quiz/', include('quiz.urls')),
     path('admin/', admin.site.urls),
     path("accounts/profile/", profile_view, name="account_profile"),
     path("accounts/", include('allauth.urls')),
