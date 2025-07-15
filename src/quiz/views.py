@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 
 def index(request):
     """Display all available decks on the dashboard"""
-    decks = Deck.objects.all().order_by('-updated_at')
+    decks = Deck.objects.filter(owner=request.user).order_by('-updated_at')
 
     # Add basic card count for each deck
     for deck in decks:
@@ -28,7 +28,8 @@ def create_deck(request):
         if deck_name:
             deck = Deck.objects.create(
                 deck_name=deck_name,
-                tags=tags
+                tags=tags,
+                owner=request.user  # Set the owner to the current user
             )
             messages.success(request, f'Deck "{deck_name}" created successfully!')
             return redirect('deck_detail', deck_id=deck.id)
@@ -40,7 +41,7 @@ def create_deck(request):
 
 def deck_detail(request, deck_id):
     """Display deck details and cards"""
-    deck = get_object_or_404(Deck, id=deck_id)
+    deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
     cards = deck.cards.all().order_by('-created_at')
 
     context = {
@@ -53,7 +54,7 @@ def deck_detail(request, deck_id):
 def add_card(request, deck_id):
     """Add a new card of furry to the deck"""
 
-    deck = get_object_or_404(Deck, id=deck_id)
+    deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
 
     if request.method == 'POST':
         question = request.POST.get('question', '').strip()
@@ -83,7 +84,7 @@ def add_card(request, deck_id):
 def study_deck(request, deck_id):
     """Start or continue studying a deck"""
 
-    deck = get_object_or_404(Deck, id=deck_id)
+    deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
     cards = deck.cards.all()
 
     if not cards.exists():
@@ -130,3 +131,33 @@ def study_deck(request, deck_id):
 @login_required
 def profile_view(request):
     return render(request, 'account/profile.html', {'user': request.user})
+
+
+@login_required
+def share_deck(request, deck_id):
+    """Copies a deck and all its cards, assigning the copy to the current user."""
+    # Get the deck or 404
+    original_deck = get_object_or_404(Deck, id=deck_id)
+
+    # Create a new deck for the current user
+    new_deck = Deck.objects.create(
+        deck_name=f"{original_deck.deck_name} (Copy)",
+        tags=original_deck.tags,
+        owner=request.user,
+    )
+
+    # Copy each FlashCard (all fields except pk/id and deck)
+    for card in original_deck.cards.all():
+        FlashCard.objects.create(
+            deck=new_deck,
+            question=card.question,
+            answer=card.answer,
+            tags=card.tags,
+            disabled=card.disabled,
+        )
+
+    messages.success(
+        request,
+        f'Shared deck "{original_deck.deck_name}" to your account!'
+    )
+    return redirect('deck_detail', deck_id=new_deck.id)

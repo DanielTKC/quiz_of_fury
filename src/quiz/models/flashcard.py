@@ -12,7 +12,8 @@ class FlashCard(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     difficulty = models.FloatField(
         blank=True,
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        default=3.0
     )
     disabled = models.BooleanField(default=False)
     consecutive_correct = models.IntegerField(default=0)
