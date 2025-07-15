@@ -2,6 +2,7 @@ from django.test import TestCase
 from unittest.mock import Mock
 from quiz.services.scheduler import Scheduler
 from quiz.models import Deck, FlashCard
+from datetime import datetime
 
 class SchedulerTests(TestCase):
     def test_modify_card_four_difficulty_no_repititions(self):
@@ -119,3 +120,21 @@ class SchedulerTests(TestCase):
         scheduler.modify_card(card)
         # Should stay at 1.3, never decrease
         self.assertAlmostEqual(card.ease_factor, 1.3)
+
+    def test_sort_cards(self):
+        # Create mock cards with different next_review and ease_factor values
+        card1 = Mock(id=1, next_review=datetime(2023, 10, 1), ease_factor=1.5)
+        card2 = Mock(id=2, next_review=datetime(2023, 10, 2), ease_factor=1.2)
+        card3 = Mock(id=3, next_review=datetime(2023, 10, 1), ease_factor=1.3)
+        card4 = Mock(id=4, next_review=datetime(2023, 10, 3), ease_factor=1.5)
+
+        cards = [card1, card2, card3, card4]
+        scheduler = Scheduler()
+        sorted_cards = scheduler.sort_cards(cards)
+        # Correct expected order
+        self.assertEqual(sorted_cards, [card3, card1, card2, card4])
+        self.assertEqual(sorted_cards[0].id, 3)
+        self.assertEqual(sorted_cards[1].id, 1)
+        self.assertEqual(sorted_cards[2].id, 2)
+        self.assertEqual(sorted_cards[3].id, 4)
+

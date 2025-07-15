@@ -21,3 +21,7 @@ class Scheduler:
         if card.ease_factor < 1.3:
             card.ease_factor = 1.3
         card.next_review = datetime.now() + timedelta(days=card.interval)
+
+    def sort_cards(self, cards):
+        # Sort cards by next review date, then ease factor, then finally by id
+        return sorted(cards, key=lambda x: (x.next_review, x.ease_factor, x.id))
