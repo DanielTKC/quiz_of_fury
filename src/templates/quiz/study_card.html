@@ -2,129 +2,275 @@
 {% load static %}
 {% block content %}
 
-    <section class="py-5">
-        <div class="container px-4 px-lg-5">
-            <!-- Basic progress header -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-                            <h3>Studying: {{ deck.deck_name }}</h3>
-                            <p class="text-muted mb-0">
-                                Card {{ session_data.cards_studied|add:1 }} of {{ session_data.total_due }}
-                                ({{ cards_remaining }} remaining)
-                            </p>
-                        </div>
-                        <div>
-                            <a href="{% url 'deck_detail' deck.id %}" class="btn btn-outline-secondary">
-                                <i class="bi-x-circle me-1"></i>Exit Study
-                            </a>
-                        </div>
+<section class="py-5">
+    <div class="container px-4 px-lg-5">
+        <!-- Basic progress header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3>Studying: {{ deck.deck_name }}</h3>
+                        <p class="text-muted mb-0">
+                            Card {{ session_data.cards_studied|add:1 }} of {{ session_data.total_due }}
+                            ({{ cards_remaining }} remaining)
+                        </p>
                     </div>
-
-                    <!-- TODO ADD Progress Bar -->
-
+                    <div>
+                        <a href="{% url 'deck_detail' deck.id %}" class="btn btn-outline-secondary">
+                            <i class="bi-x-circle me-1"></i>Exit Study
+                        </a>
+                    </div>
                 </div>
 
-                <!--Display the cards -->
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="card shadow-lg study-card">
-                            <div class="card-body p-5 text-center">
-                                <!-- Question Side -->
-                                <div id="question-side" class="study-side">
-
-                                    <div class="mb-3">
-                                        <span class="badge bg-primary fs-6">Question</span>
-                                    </div>
-
-                                    <div class="question-content">
-                                        <h4 class="mb-4">{{ card.question }}</h4>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <button type="button" class="btn btn-success btn-lg" onclick="showAnswer()">
-                                            <i class="bi-eye me-2"></i>
-                                            Show Answer
-                                        </button>
-                                    </div>
-                                    <div class="mt-3">
-                                        <small class="text-muted">
-                                            <i class="bi-lightbulb me-1"></i>
-                                            Write down your answer before revealing it!
-                                        </small>
-                                    </div>
-                                </div>
-
-                                <!-- Did this in JS to hide the answer, any ideas? -->
-                                <!-- The problem is when the next page loads the screen jumps to the top -->
-                                <div id="answer-side" class="study-side" style="display: none;">
-                                    <div class="mb-3">
-                                        <span class="badge bg-success fs-6">Answer</span>
-                                    </div>
-                                    <div class="answer-content">
-                                        <h5 class="text-muted mb-3">{{ card.question }}</h5>
-                                        <hr>
-                                        <h4 class="mb-4 text-primary">{{ card.answer }}</h4>
-                                    </div>
-
-                                    <!-- Next Card Button -->
-                                    <div class="mt-4">
-                                        <form method="post">
-                                            {% csrf_token %}
-                                            <button type="submit" name="next_card" class="btn btn-primary btn-lg">
-                                                <i class="bi-arrow-right me-2"></i>Next Card
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card Info -->
-                            <div class="card-footer bg-light text-center">
-                                {% if card.tags %}
-                                    <div>
-                                        <small class="text-muted">
-                                            <i class="bi-tag me-1"></i>{{ card.tags }}
-                                        </small>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Info -->
-                        <div class="text-center mt-3">
-                            <small class="text-muted">
-                                <i class="bi-info-circle me-1"></i>
-                                Click "Show Answer" to reveal, then "Next Card" to continue
-                            </small>
-                        </div>
+                <!-- Progress Bar https://getbootstrap.com/docs/4.0/components/progress/-->
+                <div class="progress mt-3" style="height: 8px;">
+                    <div class="progress-bar bg-primary"
+                         role="progressbar"
+                         style="width: {{ session_data.cards_studied|add:1 }}0%"
+                         aria-valuenow="{{ session_data.cards_studied|add:1 }}"
+                         aria-valuemin="0"
+                         aria-valuemax="{{ session_data.total_due }}">
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- Display the cards -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg study-card">
+                    <div class="card-body p-5 text-center">
+                        <!-- Question Side -->
+                        <div id="question-side" class="study-side">
+                            <div class="mb-3">
+                                <span class="badge bg-primary fs-6">Question</span>
+                            </div>
+
+                            <div class="question-content">
+                                <h4 class="mb-4">{{ card.question }}</h4>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-success btn-lg" onclick="showAnswer()">
+                                    <i class="bi-eye me-2"></i>
+                                    Show Answer
+                                </button>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="bi-lightbulb me-1"></i>
+                                    Write down your answer before revealing it!
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Answer Side with Star Rating -->
+                        <div id="answer-side" class="study-side" style="display: none;">
+                            <div class="mb-3">
+                                <span class="badge bg-success fs-6">Answer</span>
+                            </div>
+                            <div class="answer-content">
+                                <h5 class="text-muted mb-3">{{ card.question }}</h5>
+                                <hr>
+                                <h4 class="mb-4 text-primary">{{ card.answer }}</h4>
+                            </div>
+
+                            <!-- Star Rating System -->
+                            <div class="mt-4">
+                                <h5 class="mb-3">How well did you know this?</h5>
+                                <div class="star-rating-container">
+                                    <div class="star-rating" data-card-id="{{ card.id }}">
+                                        <div class="star-labels mb-2">
+                                            <small class="text-muted">Hard</small>
+                                            <small class="text-muted ms-4">OK</small>
+                                            <small class="text-muted ms-4">Good</small>
+                                            <small class="text-muted ms-4">Easy</small>
+                                            <small class="text-muted ms-3">Perfect</small>
+                                        </div>
+                                        <div class="stars">
+                                            <i class="bi-star star" data-rating="1" title="Hard (1)"></i>
+                                            <i class="bi-star star" data-rating="2" title="OK (2)"></i>
+                                            <i class="bi-star star" data-rating="3" title="Good (3)"></i>
+                                            <i class="bi-star star" data-rating="4" title="Easy (4)"></i>
+                                            <i class="bi-star star" data-rating="5" title="Perfect (5)"></i>
+                                        </div>
+                                        <div class="rating-feedback mt-2">
+                                            <small class="text-muted">Click a star to rate and continue</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Loading indicator -->
+                            <div id="loading-indicator" class="mt-3" style="display: none;">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <small class="text-muted ms-2">Processing rating...</small>
+                            </div>
+                        </div>
+
+                        <!-- Session Complete Message -->
+                        <div id="session-complete" class="study-side" style="display: none;">
+                            <div class="text-center py-4">
+                                <i class="bi-trophy text-warning mb-3" style="font-size: 3rem;"></i>
+                                <h4 class="text-success mb-3">Session Complete! 🎉</h4>
+                                <p class="text-muted mb-4">Great job! You've completed all cards in this deck.</p>
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                    <a href="{% url 'study_deck' deck.id %}" class="btn btn-primary me-md-2">
+                                        <i class="bi-arrow-repeat me-1"></i>Study Again
+                                    </a>
+                                    <a href="{% url 'deck_detail' deck.id %}" class="btn btn-outline-secondary">
+                                        <i class="bi-arrow-left me-1"></i>Back to Deck
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="card-footer bg-light text-center">
+                        {% if card.tags %}
+                            <div>
+                                <small class="text-muted">
+                                    <i class="bi-tag me-1"></i>{{ card.tags }}
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi-info-circle me-1"></i>
+                        Rate your confidence to continue to the next card
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 
-    <!-- Need to move these to a separate file -->
-    <style>
-        .study-card {
-            min-height: 400px;
-            transition: all 0.3s ease;
+<!-- Leaving inline js here, can't seem to get it to work in static files -->
+<script>
+    function showAnswer() {
+        document.getElementById('question-side').style.display = 'none';
+        document.getElementById('answer-side').style.display = 'block';
+    }
+
+    // Star rating functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star');
+        const feedbackElement = document.querySelector('.rating-feedback');
+        const cardId = document.querySelector('.star-rating').dataset.cardId;
+
+        // Rating descriptions
+        const ratingDescriptions = {
+            1: "Hard - I need more practice with this soon",
+            2: "OK - I need a little more practice in a few days",
+            3: "Good - I know this pretty well, try me in a week",
+            4: "Easy - This is easy, test me in few weeks",
+            5: "Perfect - I know this like my phone number!"
+        };
+
+        // Add hover effects
+        stars.forEach((star, index) => {
+            star.addEventListener('mouseenter', function() {
+                highlightStars(index + 1);
+                const rating = index + 1;
+                feedbackElement.innerHTML = `<small class="text-primary">${ratingDescriptions[rating]}</small>`;
+            });
+
+            star.addEventListener('mouseleave', function() {
+                clearStars();
+                feedbackElement.innerHTML = '<small class="text-muted">Click a star to rate and continue</small>';
+            });
+
+            star.addEventListener('click', function() {
+                const rating = index + 1;
+                submitRating(rating, cardId);
+            });
+        });
+
+        function highlightStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                }
+            });
         }
 
-        .progress {
-            height: 10px;
+        function clearStars() {
+            stars.forEach(star => {
+                star.classList.remove('filled');
+            });
         }
-    </style>
 
-    <script>
-        function showAnswer() {
-            document.getElementById('question-side').style.display = 'none';
-            document.getElementById('answer-side').style.display = 'block';
+        function submitRating(rating, cardId) {
+            // Disable stars and show loading
+            stars.forEach(star => {
+                star.style.pointerEvents = 'none';
+                star.classList.add('active');
+            });
 
-            document.querySelector('button[name="next_card"]').focus();
+            // Keep the rating highlighted
+            highlightStars(rating);
+
+            document.getElementById('loading-indicator').style.display = 'block';
+            feedbackElement.innerHTML = `<small class="text-success">Rated ${rating} star${rating > 1 ? 's' : ''}!</small>`;
+
+            // Submit rating and send the json data to the view
+            fetch(`/deck/{{ deck.id }}/card/${cardId}/rate/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    rating: rating
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-indicator').style.display = 'none';
+
+                if (data.success) {
+                    if (data.session_complete) {
+                        document.getElementById('answer-side').style.display = 'none';
+                        document.getElementById('session-complete').style.display = 'block';
+                    } else {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 800);
+                    }
+                } else {
+                    // Handle error
+                    feedbackElement.innerHTML = '<small class="text-danger">Error rating card. Please try again.</small>';
+                    // Re-enable stars
+                    stars.forEach(star => {
+                        star.style.pointerEvents = 'auto';
+                        star.classList.remove('active');
+                    });
+                    clearStars();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading-indicator').style.display = 'none';
+                feedbackElement.innerHTML = '<small class="text-danger">App error. Please try again.</small>';
+
+                // Re-enable stars
+                stars.forEach(star => {
+                    star.style.pointerEvents = 'auto';
+                    star.classList.remove('active');
+                });
+                clearStars();
+            });
         }
-    </script>
+    });
+</script>
+
 {% endblock %}

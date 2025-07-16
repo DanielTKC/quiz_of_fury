@@ -5,13 +5,14 @@ class Scheduler:
     def modify_card(self, card):
         # Check diffiulty and adjust card repititons, interval accordingly
         if card.difficulty < 3.0:
-            card.repititions = 0
+            # In the model this was consecutive_correct, changed it to match the field name
+            card.consecutive_correct = 0
             card.interval = 1
         else:
-            card.repititions += 1
-            if card.repititions == 1:
+            card.consecutive_correct += 1
+            if card.consecutive_correct == 1:
                 card.interval = 1
-            elif card.repititions == 2:
+            elif card.consecutive_correct == 2:
                 card.interval = 6
             else:
                 card.interval = int(card.interval * card.ease_factor)

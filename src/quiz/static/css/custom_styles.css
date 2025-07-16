@@ -1,0 +1,73 @@
+ .study-card {
+        min-height: 500px;
+        transition: all 0.3s ease;
+    }
+
+    .progress {
+        height: 10px;
+    }
+
+    .star-rating-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .star-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .stars {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .star {
+        font-size: 2rem;
+        color: #dee2e6;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .star:hover {
+        color: #ffc107;
+        transform: scale(1.1);
+    }
+
+    .star.active {
+        color: #ffc107;
+    }
+
+    .star.filled {
+        color: #ffc107;
+    }
+
+    .rating-feedback {
+        min-height: 20px;
+    }
+
+    .study-side {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .star {
+            font-size: 1.5rem;
+        }
+
+        .star-labels {
+            font-size: 0.75rem;
+        }
+
+        .stars {
+            gap: 4px;
+        }
+    }

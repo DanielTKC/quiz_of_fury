@@ -1,6 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
 from .models import Deck, FlashCard
+from .services.scheduler import Scheduler
 from django.contrib.auth.decorators import login_required
 
 
@@ -51,9 +56,9 @@ def deck_detail(request, deck_id):
     }
     return render(request, 'quiz/deck_detail.html', context)
 
+
 def add_card(request, deck_id):
     """Add a new card of furry to the deck"""
-
     deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
 
     if request.method == 'POST':
@@ -69,7 +74,6 @@ def add_card(request, deck_id):
                 tags=tags,
                 difficulty=3.0
             )
-
             messages.success(request, 'Card added!')
             return redirect('deck_detail', deck_id=deck.id)
         else:
@@ -82,8 +86,7 @@ def add_card(request, deck_id):
 
 
 def study_deck(request, deck_id):
-    """Start or continue studying a deck"""
-
+    """Start or continue studying a  deck"""
     deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
     cards = deck.cards.all()
 
@@ -91,27 +94,21 @@ def study_deck(request, deck_id):
         messages.error(request, 'This deck has no fury to study!')
         return redirect('deck_detail', deck_id=deck.id)
 
-    # Go to the next card
-    if request.method == 'POST' and 'next_card' in request.POST:
-    # Get the first card (for MVP, just go through cards in order)
-    # In session, track which card we're on
-        current_index = request.session.get(f'study_deck_{deck_id}_index', 0)
-        request.session[f'study_deck_{deck_id}_index'] = current_index + 1
-        return redirect('study_deck', deck_id=deck.id)
-
-    # If all cards are studied, reset to beginning
+    # Get current card index from session
     current_card_index = request.session.get(f'study_deck_{deck_id}_index', 0)
 
+    # If all cards are studied, reset to beginning
     if current_card_index >= cards.count():
         current_card_index = 0
         request.session[f'study_deck_{deck_id}_index'] = current_card_index
         messages.success(request, 'All cards complete, starting over.')
+
     card = cards[current_card_index]
     cards_studied = current_card_index
     total_cards = cards.count()
     cards_remaining = total_cards - current_card_index - 1
 
-    # VERY Simple session data for template
+    # Session data for template
     session_data = {
         'cards_studied': cards_studied,
         'total_due': total_cards,
@@ -126,7 +123,59 @@ def study_deck(request, deck_id):
 
     return render(request, 'quiz/study_card.html', context)
 
-# TODO def rate_card(request, deck_id, card_id):
+
+@require_POST
+@csrf_exempt
+def rate_card(request, deck_id, card_id):
+    """Handle card rating and advance to next card"""
+    try:
+        # Get the deck and card
+        deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
+        card = get_object_or_404(FlashCard, id=card_id, deck=deck)
+
+
+        # Parse the JSON data
+        data = json.loads(request.body)
+        rating = data.get('rating')
+
+
+        # make sure the rating is valid
+        if not rating or not (1 <= int(rating) <= 5):
+            return JsonResponse({'error': 'Invalid rating'}, status=400)
+
+        # Update card difficulty based on rating
+        card.difficulty = float(rating)
+
+        # Use scheduler to update card intervals
+        scheduler = Scheduler()
+        scheduler.modify_card(card)
+        card.save()
+
+        # Advance to next card in session
+        current_index = request.session.get(f'study_deck_{deck_id}_index', 0)
+        cards_count = deck.cards.count()
+
+        if current_index + 1 >= cards_count:
+            # Session complete
+            request.session[f'study_deck_{deck_id}_index'] = 0
+            return JsonResponse({
+                'success': True,
+                'session_complete': True,
+                'message': 'Great job! You\'ve completed all cards in this deck.You are a Fury Master.'
+            })
+        else:
+            # Move to next card
+            request.session[f'study_deck_{deck_id}_index'] = current_index + 1
+            return JsonResponse({
+                'success': True,
+                'session_complete': False,
+
+                'next_card_index': current_index + 1
+            })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 
 @login_required
 def profile_view(request):
