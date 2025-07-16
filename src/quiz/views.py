@@ -213,3 +213,16 @@ def share_deck(request, deck_id):
     return redirect('deck_detail', deck_id=new_deck.id)
 
 
+@login_required
+def profile_view(request):
+    """Enhanced profile view with user statistics"""
+    user_decks = Deck.objects.filter(owner=request.user)
+    total_cards = sum(deck.cards.count() for deck in user_decks)
+
+    context = {
+        'user': request.user,
+        'total_decks': user_decks.count(),
+        'total_cards': total_cards,
+        'recent_decks': user_decks.order_by('-updated_at')[:3],  
+    }
+    return render(request, 'account/profile.html', context)
