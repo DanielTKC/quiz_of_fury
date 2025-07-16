@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- This page adapted from https://startbootstrap.com/theme/landing-page -->
+{% block title %}Welcome to Quiz of Fury{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 align-items-center justify-content-center">
+                <div class="col-lg-8 col-xl-7 col-xxl-6">
+                    <div class="my-5 text-center text-xl-start">
+                        <h1 class="display-5 fw-bolder mb-2">
+                            <i class="bi-lightning-charge-fill me-3"></i>
+                            Quiz of Fury
+                        </h1>
+                        <p class="lead fw-normal mb-4">
+                            Master any subject with intelligent flashcards powered by spaced repetition.
+                            Study smarter, remember longer, and achieve your learning goals faster than ever before.
+                        </p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
+                            <a class="btn btn-light btn-lg px-4 me-sm-3" href="{% url 'account_signup' %}">
+                                <i class="bi-person-plus me-2"></i>Get Started Free
+                            </a>
+                            <a class="btn btn-outline-light btn-lg px-4" href="{% url 'account_login' %}">
+                                <i class="bi-box-arrow-in-right me-2"></i>Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center">
+                    <div class="bg-light rounded-3 p-4">
+                        <i class="bi-journal-bookmark text-primary" style="font-size: 8rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="row gx-4 gx-lg-5">
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <div class="text-center">
+                        <i class="bi-emoji-sunglasses text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="h4 fw-bolder">Smart Learning</h4>
+                        <p class="text-muted mb-0">
+                            Our spaced repetition algorithm adapts to your learning pace,
+                            showing you cards exactly when you need to review them.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <div class="text-center">
+                        <i class="bi-speedometer2 text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="h4 fw-bolder">Fast & Simple</h4>
+                        <p class="text-muted mb-0">
+                            Create flashcard decks in seconds and start studying immediately.
+                            No complex setup or overwhelming features.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <i class="bi-trophy text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="h4 fw-bolder">Track Progress</h4>
+                        <p class="text-muted mb-0">
+                            Watch your knowledge grow with detailed statistics,
+                            study streaks, and achievement tracking.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-5 bg-light">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-lg-8 col-xl-6">
+                    <div class="text-center">
+                        <h2 class="fw-bolder">Ready to supercharge your learning?</h2>
+                        <p class="lead fw-normal text-muted mb-5">
+                            Join thousands of students who have transformed their study habits with Quiz of Fury.
+                        </p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                            <a class="btn btn-primary btn-lg px-4 me-sm-3" href="{% url 'account_signup' %}">
+                                Start Learning Today
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
