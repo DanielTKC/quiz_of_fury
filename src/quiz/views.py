@@ -4,15 +4,28 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
-from .models import Deck, FlashCard
+from .models import Deck, FlashCard, Profile
 from .services.scheduler import Scheduler
 from django.contrib.auth.decorators import login_required
+from datetime import date, timedelta
 
 
 def index(request):
     """Display all available decks on the dashboard for authed users"""
     if request.user.is_authenticated:
         decks = Deck.objects.filter(owner=request.user).order_by('-updated_at')
+
+        # Lazy - I don't want to add profile in admin, so this should do the trick
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        today = date.today()
+
+        # Only update if last_study_date exists and is not today
+        if profile.last_study_date and profile.last_study_date != today:
+            if profile.last_study_date == today - timedelta(days=1):
+                pass  # streak is ok
+            else:
+                profile.study_streak = 0
+                profile.save()
 
     # Add basic card count for each deck
         for deck in decks:
@@ -159,6 +172,19 @@ def rate_card(request, deck_id, card_id):
         if current_index + 1 >= cards_count:
             # Session complete
             request.session[f'study_deck_{deck_id}_index'] = 0
+
+            # code to update profile study streak
+            profile = request.user.profile
+            today = date.today()
+            if profile.last_study_date == today:
+                pass  # already incremented today
+            elif profile.last_study_date == today - timedelta(days=1):
+                profile.study_streak += 1
+            else:
+                profile.study_streak = 1
+            profile.last_study_date = today
+            profile.save()
+
             return JsonResponse({
                 'success': True,
                 'session_complete': True,
@@ -177,10 +203,10 @@ def rate_card(request, deck_id, card_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-@login_required
-def profile_view(request):
-    return render(request, 'account/profile.html', {'user': request.user})
+# I don't think this is used, but I'm scared to delete it - Dan
+# @login_required
+# def profile_view(request):
+#     return render(request, 'account/profile.html', {'user': request.user})
 
 
 @login_required
@@ -224,5 +250,23 @@ def profile_view(request):
         'total_decks': user_decks.count(),
         'total_cards': total_cards,
         'recent_decks': user_decks.order_by('-updated_at')[:3],
+        'study_streak': request.user.profile.study_streak,
     }
     return render(request, 'account/profile.html', context)
+
+@login_required
+def delete_card(request, deck_id, card_id):
+    deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
+    card = get_object_or_404(FlashCard, id=card_id, deck=deck)
+    if request.method == "POST":
+        card.delete()
+        return redirect('deck_detail', deck_id=deck.id)
+    return render(request, 'quiz/confirm_delete_card.html', {'card': card, 'deck': deck})
+
+@login_required
+def delete_deck(request, deck_id):
+    deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
+    if request.method == "POST":
+        deck.delete()
+        return redirect('index')
+    return render(request, 'quiz/confirm_delete_deck.html', {'deck': deck})
