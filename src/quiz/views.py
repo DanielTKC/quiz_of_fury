@@ -223,6 +223,6 @@ def profile_view(request):
         'user': request.user,
         'total_decks': user_decks.count(),
         'total_cards': total_cards,
-        'recent_decks': user_decks.order_by('-updated_at')[:3],  
+        'recent_decks': user_decks.order_by('-updated_at')[:3],
     }
     return render(request, 'account/profile.html', context)
