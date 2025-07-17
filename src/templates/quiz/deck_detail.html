@@ -10,8 +10,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h2 class="mb-1">{{ deck.deck_name }}</h2>
-                            <p class="text-muted mb-0">{{ total_cards }} card{% if total_cards != 1 %}s{% endif %}
-                                total</p>
+                            <p class="text-muted mb-0">{{ total_cards }} card{% if total_cards != 1 %}s{% endif %} total</p>
                             {% if deck.tags %}
                                 <small class="text-secondary">Tags: {{ deck.tags }}</small>
                             {% endif %}
@@ -23,8 +22,8 @@
                             </a>
 
                             <a href="#" class="btn btn-danger ms-2"
-                                data-bs-toggle="modal"
-                                data-bs-target="#confirmDeleteDeckModal">
+                               data-bs-toggle="modal"
+                               data-bs-target="#confirmDeleteDeckModal">
                                 <i class="bi-trash me-1"></i>
                                 Delete Deck
                             </a>
@@ -33,6 +32,11 @@
                                 <i class="bi-arrow-left me-1"></i>
                                 Back to Dashboard
                             </a>
+
+                            <button class="btn btn-primary me-2" onclick="openShareModal()">
+                                <i class="bi-share me-1"></i>
+                                Share Deck
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -40,31 +44,31 @@
 
             <!-- Cards Display -->
             {% if cards %}
-            <div class="row">
-                {% for card in cards %}
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title text-primary">Question:</h6>
-                                <p class="card-text">{{ card.question }}</p>
-                                <h6 class="card-title text-success">Answer:</h6>
-                                <p class="card-text">{{ card.answer }}</p>
-                                {% if card.tags %}
-                                    <small class="text-muted">Tags: {{ card.tags }}</small>
-                                {% endif %}
-                                <div class="mt-3 d-flex justify-content-end">
-                                    <form action="{% url 'delete_card' deck.id card.id %}" method="post" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="bi-trash me-1"></i> Delete
-                                        </button>
-                                    </form>
+                <div class="row">
+                    {% for card in cards %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">Question:</h6>
+                                    <p class="card-text">{{ card.question }}</p>
+                                    <h6 class="card-title text-success">Answer:</h6>
+                                    <p class="card-text">{{ card.answer }}</p>
+                                    {% if card.tags %}
+                                        <small class="text-muted">Tags: {{ card.tags }}</small>
+                                    {% endif %}
+                                    <div class="mt-3 d-flex justify-content-end">
+                                        <form action="{% url 'delete_card' deck.id card.id %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi-trash me-1"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
             {% else %}
                 <!-- If there is no cards in deck -->
                 <div class="row justify-content-center">
@@ -77,7 +81,6 @@
                                 <a href="{% url 'add_card' deck.id %}" class="btn btn-primary">
                                     <i class="bi-plus-circle me-1"></i>Add some Fury!
                                 </a>
-
                             </div>
                         </div>
                     </div>
@@ -85,31 +88,71 @@
             {% endif %}
         </div>
     </section>
+
     <!-- Delete Deck Confirmation Modal -->
     <div class="modal fade" id="confirmDeleteDeckModal" tabindex="-1" aria-labelledby="confirmDeleteDeckModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-            <form method="post" action="{% url 'delete_deck' deck.id %}">
-                {% csrf_token %}
-                <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteDeckModalLabel">Delete Deck</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                <p>
-                    Are you sure you want to delete the deck "<strong>{{ deck.deck_name }}</strong>"?<br>
-                    <small class="text-danger">All cards in this deck will be permanently removed. This action cannot be undone.</small>
-                </p>
-                </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger">
-                    <i class="bi-trash me-1"></i> Delete
-                </button>
-                </div>
-            </form>
+                <form method="post" action="{% url 'delete_deck' deck.id %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteDeckModalLabel">Delete Deck</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Are you sure you want to delete the deck "<strong>{{ deck.deck_name }}</strong>"?<br>
+                            <small class="text-danger">All cards in this deck will be permanently removed. This action cannot be undone.</small>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi-trash me-1"></i> Delete
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
+    <!-- Share Modal -->
+    <div id="shareModal" style="display: none; background-color: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Share This Deck</h5>
+                    <button type="button" class="btn-close" aria-label="Close" onclick="closeShareModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="shareLink" readonly>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" onclick="closeShareModal()">Close</button>
+                    <button class="btn btn-primary" onclick="copyShareLink()">Copy Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal JavaScript -->
+    <script>
+        function openShareModal() {
+            const deckId = "{{ deck.id }}";
+            const shareURL = window.location.origin + "/share/" + deckId;
+            document.getElementById("shareLink").value = shareURL;
+            document.getElementById("shareModal").style.display = "block";
+        }
+
+        function closeShareModal() {
+            document.getElementById("shareModal").style.display = "none";
+        }
+
+        function copyShareLink() {
+            const input = document.getElementById("shareLink");
+            input.select();
+            document.execCommand("copy");
+            alert("Copied!");
+        }
+    </script>
 {% endblock %}
