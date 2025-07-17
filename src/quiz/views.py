@@ -10,20 +10,23 @@ from django.contrib.auth.decorators import login_required
 
 
 def index(request):
-    """Display all available decks on the dashboard"""
-    decks = Deck.objects.filter(owner=request.user).order_by('-updated_at')
+    """Display all available decks on the dashboard for authed users"""
+    if request.user.is_authenticated:
+        decks = Deck.objects.filter(owner=request.user).order_by('-updated_at')
 
     # Add basic card count for each deck
-    for deck in decks:
-        deck.total_cards = deck.cards.count()
+        for deck in decks:
+            deck.total_cards = deck.cards.count()
 
-    context = {
-        'decks': decks,
-        'total_decks': decks.count()
-    }
-    return render(request, 'quiz/index.html', context)
+        context = {
+            'decks': decks,
+            'total_decks': decks.count()
+        }
+        return render(request, 'quiz/index.html', context)
+    else:
+        return render(request, 'quiz/landing.html')
 
-
+@login_required
 def create_deck(request):
     """Handle deck creation"""
     if request.method == 'POST':
@@ -43,7 +46,7 @@ def create_deck(request):
 
     return render(request, 'quiz/create_deck.html')
 
-
+@login_required
 def deck_detail(request, deck_id):
     """Display deck details and cards"""
     deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
@@ -56,7 +59,7 @@ def deck_detail(request, deck_id):
     }
     return render(request, 'quiz/deck_detail.html', context)
 
-
+@login_required
 def add_card(request, deck_id):
     """Add a new card of furry to the deck"""
     deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
@@ -84,7 +87,7 @@ def add_card(request, deck_id):
     }
     return render(request, 'quiz/add_card.html', context)
 
-
+@login_required
 def study_deck(request, deck_id):
     """Start or continue studying a  deck"""
     deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
@@ -133,11 +136,9 @@ def rate_card(request, deck_id, card_id):
         deck = get_object_or_404(Deck, id=deck_id, owner=request.user)
         card = get_object_or_404(FlashCard, id=card_id, deck=deck)
 
-
         # Parse the JSON data
         data = json.loads(request.body)
         rating = data.get('rating')
-
 
         # make sure the rating is valid
         if not rating or not (1 <= int(rating) <= 5):
@@ -210,3 +211,18 @@ def share_deck(request, deck_id):
         f'Shared deck "{original_deck.deck_name}" to your account!'
     )
     return redirect('deck_detail', deck_id=new_deck.id)
+
+
+@login_required
+def profile_view(request):
+    """Enhanced profile view with user statistics"""
+    user_decks = Deck.objects.filter(owner=request.user)
+    total_cards = sum(deck.cards.count() for deck in user_decks)
+
+    context = {
+        'user': request.user,
+        'total_decks': user_decks.count(),
+        'total_cards': total_cards,
+        'recent_decks': user_decks.order_by('-updated_at')[:3],
+    }
+    return render(request, 'account/profile.html', context)

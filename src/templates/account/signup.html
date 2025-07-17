@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign Up - Quiz of Fury{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container px-4 px-lg-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white text-center">
+                        <h3 class="card-title mb-0">
+
+                            Create Account
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" action="{% url 'account_signup' %}">
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger mb-3">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">Email</label>
+                                <input type="email"
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                       id="id_email"
+                                       name="email"
+                                       placeholder="Enter your email"
+                                       value="{{ form.email.value|default:'' }}"
+                                       required>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.email.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_password1" class="form-label">Password</label>
+                                <input type="password"
+                                       class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                                       id="id_password1"
+                                       name="password1"
+                                       placeholder="Choose a password"
+                                       required>
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.password1.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_password2" class="form-label">Confirm Password</label>
+                                <input type="password"
+                                       class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                                       id="id_password2"
+                                       name="password2"
+                                       placeholder="Confirm your password"
+                                       required>
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.password2.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi-rocket-takeoff me-2"></i>
+                                    Create Account
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Already have an account?
+                                <a href="{% url 'account_login' %}" class="text-decoration-none fw-bold">
+                                    Login here
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
