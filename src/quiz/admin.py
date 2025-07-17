@@ -1,5 +1,5 @@
 from django.contrib import admin
-from quiz.models import FlashCard, Deck
+from quiz.models import FlashCard, Deck, Profile
 
 class FlashCardInline(admin.TabularInline):
     model = FlashCard
@@ -18,3 +18,8 @@ class FlashCardAdmin(admin.ModelAdmin):
     list_display = ('question', 'deck', 'difficulty', 'next_review')
     list_filter = ('disabled', 'deck')
     search_fields = ('question', 'answer', 'tags')
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'study_streak')
+    search_fields = ('user__username',)
