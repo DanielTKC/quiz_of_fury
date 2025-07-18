@@ -14,14 +14,22 @@
    ```bash
    docker compose up
     ```
-6. Open your web browser and go to: 
+6. Open a new terminal window and run the following commands:
+   ```bash
+   docker compose up exec app bash
+   cd src
+   poetry shell
+   python manage.py migrate
+    ```  
+
+7. Open your web browser and go to: 
    ```
     http://127.0,0.1:8000 OR
     http://localhost:8000 OR
     http://0.0.0.0:8000
    ```
    
-![img.png](img.png)
+![img_2.png](img_2.png)
 
 ## Generate some sample data
 From command line, run:
